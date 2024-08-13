@@ -1,0 +1,98 @@
+name: Update apks
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'URL of the full OTA update package.'
+        required: true
+      msg:
+        description: 'Message for the commit.'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    name: Update apks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install git+https://github.com/geniucker-dev/payload-dumper
+
+      - name: Download prebuild fuse.erofs
+        run: |
+          wget -O /tmp/erofs-utils.zip https://github.com/sekaiacg/erofs-utils/releases/download/v1.8.1-240810/erofs-utils-v1.8.1-gddbed144-Android_x86_64-2408101419.zip
+          unzip /tmp/erofs-utils.zip -d /tmp/erofs-utils
+          chmod -R +x /tmp/erofs-utils
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download my_stock and my_heytap partition from the OTA update
+        run: |
+          python -m payload_dumper --partitions my_stock "${{ github.event.inputs.url }}"
+          python -m payload_dumper --partitions my_heytap "${{ github.event.inputs.url }}"
+          python -m payload_dumper --partitions system_ext "${{ github.event.inputs.url }}"
+
+      - name: Update files
+        run: |
+          # mount images
+          mkdir -p mnt/my_stock
+          mkdir -p mnt/my_heytap
+          mkdir -p mnt/system_ext
+          /tmp/erofs-utils/fuse.erofs output/my_stock.img mnt/my_stock
+          /tmp/erofs-utils/fuse.erofs output/my_heytap.img mnt/my_heytap
+          /tmp/erofs-utils/fuse.erofs output/system_ext.img mnt/system_ext
+
+          # list folders in my_stock/priv-app
+          echo "List of folders in my_stock/priv-app"
+          ls -l mnt/my_stock/priv-app
+          echo
+          # list folders in heytap/priv-app
+          echo "List of folders in my_heytap/priv-app"
+          ls -l mnt/my_heytap/priv-app
+          echo
+          # list folders in system_ext/app
+          echo "List of folders in system_ext/app"
+          ls -l mnt/system_ext/app
+          echo
+
+          # update files
+          rm -rf product
+          rm -rf system
+          mkdir -p product/priv-app
+          mkdir -p system/system_ext/app
+          cp -r mnt/my_stock/priv-app/KeKeUserCenter product/priv-app/
+          cp -r mnt/my_stock/priv-app/KeKeUserCenterAccount product/priv-app/
+          cp -r mnt/my_heytap/priv-app/OpenID product/priv-app/
+          cp -r mnt/system_ext/app/EidService system/system_ext/app/
+          
+          # unmount images
+          umount mnt/my_stock
+          umount mnt/my_heytap
+          umount mnt/system_ext
+
+          # cleanup
+          rm -rf mnt
+          rm -rf output
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # clear hystory
+          git checkout --orphan temp_branch
+          git add -A
+          git commit -m "${{ github.event.inputs.msg }}"
+          git branch -D main
+          git branch -m main
+          git push -f origin main
