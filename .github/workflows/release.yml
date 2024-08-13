@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    paths:
+      - 'module.prop'
+
+permissions:
+  contents: write
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.set_version.outputs.VERSION }}
+      VERSIONCODE: ${{ steps.set_version.outputs.VERSIONCODE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set tag name
+        id: set_version
+        run: |
+          cat module.prop | grep 'version=' | awk -F'=' '{print "VERSION="$2}' >> $GITHUB_OUTPUT
+          cat module.prop | grep 'versionCode=' | awk -F'=' '{print "VERSIONCODE="$2}' >> $GITHUB_OUTPUT
+
+  build:
+    name: Build
+    needs: [setup]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Zip files (excluding .git .github)
+        run: |
+          zip -r -o -X -ll WalletFix4OOS14_${{ needs.setup.outputs.VERSION }}.zip ./ -x '.git/*' -x '.github/*' -x 'update.json'
+
+      - name: Create a tag
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git rev-parse ${{ needs.setup.outputs.VERSION }} >/dev/null 2>&1; then
+            git tag ${{ needs.setup.outputs.VERSION }}
+            git push --tags
+          fi
+
+      - name: Upload release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ needs.setup.outputs.VERSION }}
+          tag_name: ${{ needs.setup.outputs.VERSION }}
+          files: WalletFix4OOS14_${{ needs.setup.outputs.VERSION }}.zip
+
+      - name: write update.json
+        run: |
+          version="${{ needs.setup.outputs.VERSION }}"
+          versionCode=${{ needs.setup.outputs.VERSIONCODE }}
+          zipUrl="https://github.com/geniucker-dev/WalletFix4OOS14/releases/download/${version}/WalletFix4OOS14_${version}.zip"
+          echo "{\"version\": \"${version}\", \"versionCode\": ${versionCode}, \"url\": \"${zipUrl}\"}" > update.json
+          git add update.json
+          git commit -m "Update update.json"
+          git push
