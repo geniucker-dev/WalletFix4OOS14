@@ -18,6 +18,11 @@ jobs:
     name: Update apks
     runs-on: ubuntu-latest
     steps:
+      - name: Setup
+        id: setup
+        run: |
+          echo FILENAME=$(basename "${{ github.event.inputs.url }}") >> $GITHUB_OUTPUT
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -36,13 +41,50 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Restore cached my_stock.img
+        id: restore_cache_my_stock
+        uses: actions/cache/restore@v4
+        with:
+          path: output/my_stock.img
+          key: ${{ steps.setup.outputs.FILENAME }}-my_stock
+      
+      - name: Restore cached my_heytap.img
+        id: restore_cache_my_heytap
+        uses: actions/cache/restore@v4
+        with:
+          path: output/my_heytap.img
+          key: ${{ steps.setup.outputs.FILENAME }}-my_heytap
+
       - name: Download my_stock and my_heytap partition from the OTA update
         run: |
-          python -m payload_dumper --partitions my_stock "${{ github.event.inputs.url }}"
-          python -m payload_dumper --partitions my_heytap "${{ github.event.inputs.url }}"
+          if [ ! -f output/my_stock.img ]; then
+            python -m payload_dumper --partitions my_stock "${{ github.event.inputs.url }}"
+          fi
+          if [ ! -f output/my_heytap.img ]; then
+            python -m payload_dumper --partitions my_heytap "${{ github.event.inputs.url }}"
+          fi
+
+      - name: Save cache my_stock.img
+        if: ${{ steps.restore_cache_my_stock.outputs.cache-hit != 'true' }}
+        id: save_cache_my_stock
+        uses: actions/cache/save@v4
+        with:
+          path: output/my_stock.img
+          key: ${{ steps.restore_cache_my_stock.outputs.cache-primary-key }}
+
+      - name: Save cache my_heytap.img
+        if: ${{ steps.restore_cache_my_heytap.outputs.cache-hit != 'true' }}
+        id: save_cache_my_heytap
+        uses: actions/cache/save@v4
+        with:
+          path: output/my_heytap.img
+          key: ${{ steps.restore_cache_my_heytap.outputs.cache-primary-key }}
 
       - name: Update files
         run: |
+          git checkout --orphan apk
+          git reset --hard
+
           # mount images
           mkdir -p mnt/my_stock
           mkdir -p mnt/my_heytap
@@ -69,12 +111,14 @@ jobs:
           cp -r mnt/my_stock/priv-app/KeKeUserCenter product/priv-app/
           cp -r mnt/my_stock/priv-app/KeKeUserCenterAccount product/priv-app/
           cp -r mnt/my_heytap/priv-app/OpenID product/priv-app/
+          cp -r mnt/my_heytap/priv-app/KeKeMarket product/priv-app/
           
           # unmount images
           umount mnt/my_stock
           umount mnt/my_heytap
-
-          # cleanup
+    
+      - name: Cleanup
+        run: |
           rm -rf mnt
           rm -rf output
 
@@ -84,9 +128,6 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           # clear hystory
-          git checkout --orphan temp_branch
           git add -A
           git commit -m "${{ github.event.inputs.msg }}"
-          git branch -D main
-          git branch -m main
-          git push -f origin main
+          git push -f origin apk
