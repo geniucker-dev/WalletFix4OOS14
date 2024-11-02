@@ -1,0 +1,7 @@
+id=walletfix4oos14
+name=Wallet Fix
+version=1.0.1
+versionCode=3
+author=geniucker-dev
+description=Remove OxygenOS account
+updateJson=https://raw.githubusercontent.com/geniucker-dev/WalletFix4OOS14/main/update.json
