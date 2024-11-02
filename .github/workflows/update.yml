@@ -111,7 +111,6 @@ jobs:
           cp -r mnt/my_stock/priv-app/KeKeUserCenter product/priv-app/
           cp -r mnt/my_stock/priv-app/KeKeUserCenterAccount product/priv-app/
           cp -r mnt/my_heytap/priv-app/OpenID product/priv-app/
-          cp -r mnt/my_heytap/priv-app/KeKeMarket product/priv-app/
           
           # unmount images
           umount mnt/my_stock
