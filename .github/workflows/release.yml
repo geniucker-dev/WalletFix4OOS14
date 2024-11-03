@@ -30,7 +30,10 @@ jobs:
           echo "versionCode=$((1000 + $(git rev-list HEAD --count)))" >> $GITHUB_OUTPUT
 
   build:
+    needs: setup
     uses: ./.github/workflows/build.yml
+    with:
+      ref: ${{ needs.setup.outputs.version }}
 
   release:
     needs: [setup, build]
@@ -64,6 +67,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: write update.json
         run: |

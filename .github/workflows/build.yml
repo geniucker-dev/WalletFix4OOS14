@@ -12,6 +12,11 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
   workflow_call:
+    inputs:
+      ref:
+        required: false
+        type: string
+        default: "main"
 
 jobs:
   build:
@@ -22,6 +27,10 @@ jobs:
         with:
           submodules: "recursive"
           fetch-depth: 0
+
+      - name: Checkout to target branch (tag)
+        run: |
+          git checkout ${{ github.event.inputs.ref }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
