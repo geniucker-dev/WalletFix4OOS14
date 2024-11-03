@@ -111,7 +111,7 @@ public:
         std::string_view process(nice_name);
 
         LOGD("process: %s", process.data());
-        if (process != "com.finshell.wallet") {
+        if (!process.starts_with("com.finshell.wallet")) {
             return;
         }
 
