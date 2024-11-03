@@ -1,10 +1,10 @@
 # Wallet Fix for OxygenOS 14
 
-使OxygenOS 14的**一加12**可以使用Oppo钱包，若使用其他设备，请将安装包中的`system.prop`中的`ro.product.model`字段改为对应机型的国行机型编号
+使OxygenOS 14的**一加12**可以使用Oppo钱包，若使用其他设备，请在安装完成后创建`/data/adb/walletfix/spoof_vars`文件，文件内容为`MODEL=你的设备型号`
 
 ## 说明
 
-本模块使用从 一加12 ColorOS 的全量OTA包中提取的 账号中心 和 OpenID 替换系统中的对应应用，然后修改`ro.product.model`为国内版
+本模块使用从 一加12 ColorOS 的全量OTA包中提取的 账号中心 和 OpenID 替换系统中的对应应用，然后对钱包应用伪装为国行系统
 
 ## 使用方法
 
