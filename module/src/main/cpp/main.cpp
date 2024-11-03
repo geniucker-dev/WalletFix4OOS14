@@ -29,8 +29,17 @@ using zygisk::Api;
 using zygisk::AppSpecializeArgs;
 using zygisk::ServerSpecializeArgs;
 
+#ifdef NDEBUG
+#define LOGD(...) ((void)0)
+#define LOGV(...) ((void)0)
+#else
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, "WalletFix4OOS14", __VA_ARGS__)
+#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "WalletFix4OOS14", __VA_ARGS__)
+#endif
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "WalletFix4OOS14", __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, "WalletFix4OOS14", __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "WalletFix4OOS14", __VA_ARGS__)
+#define LOGF(...) __android_log_print(ANDROID_LOG_FATAL, "WalletFix4OOS14", __VA_ARGS__)
 
 #define CONFIG_FILE "/data/adb/walletfix/spoof_vars"
 
@@ -153,9 +162,9 @@ public:
         LOGD("Close companion, fd: %d", fd);
         LOGI("Config file size: %d", configSize);
 
+        LOGI("Spoofing build vars for %s", process.data());
         UpdateBuildFields();
-
-        LOGI("Spoofed build fields updated");
+        LOGI("Spoofed build vars for %s", process.data());
 
         spoofVars.clear();
     }
