@@ -1,0 +1,7 @@
+id=${moduleId}
+name=${moduleName}
+version=${versionName}
+versionCode=${versionCode}
+author=geniucker-dev
+description=Remove OxygenOS account
+#updateJson=https://raw.githubusercontent.com/geniucker-dev/WalletFix4OOS14/main/update.json
