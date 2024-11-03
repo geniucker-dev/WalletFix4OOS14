@@ -14,9 +14,8 @@ on:
   workflow_call:
     inputs:
       ref:
-        required: false
+        required: true
         type: string
-        default: "main"
 
 jobs:
   build:
@@ -29,8 +28,9 @@ jobs:
           fetch-depth: 0
 
       - name: Checkout to target branch (tag)
+        if: inputs.ref
         run: |
-          git checkout ${{ github.event.inputs.ref }}
+          git checkout ${{ inputs.ref }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
