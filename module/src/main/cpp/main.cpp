@@ -111,7 +111,8 @@ public:
         std::string_view process(nice_name);
 
         LOGD("process: %s", process.data());
-        if (!process.starts_with("com.finshell.wallet")) {
+        if (!process.starts_with("com.finshell.wallet") &&
+            !process.starts_with("com.unionpay.tsmservice")) {
             return;
         }
 
@@ -131,19 +132,15 @@ public:
             for (auto &line: lines) {
                 // skip empty lines
                 LOGD("Line: %s", line.c_str());
-                LOGD("1");
                 if (trim(line).empty()) {
                     LOGD("Empty line");
                     continue;
                 }
-                LOGD("2");
                 auto parts = split(line, "=");
-                LOGD("3");
                 if (parts.size() != 2) {
                     LOGD("Invalid line");
                     continue;
                 }
-                LOGD("4");
                 auto key = trim(parts[0]);
                 auto value = trim(parts[1]);
                 spoofVars[key] = value;
