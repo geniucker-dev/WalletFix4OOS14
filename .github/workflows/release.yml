@@ -18,11 +18,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set Version
         id: set_version
         run: |
-          echo "version=$(echo ${GITHUB_REF#refs/tags/})" >> $GITHUB_OUTPUT
+          git describe --tags --abbrev=0
+          git rev-list HEAD --count
+          echo "version=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
           echo "versionCode=$((1000 + $(git rev-list HEAD --count)))" >> $GITHUB_OUTPUT
 
   build:
