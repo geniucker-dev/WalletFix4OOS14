@@ -21,7 +21,7 @@ val gitCommitHash = "git rev-parse --verify --short HEAD".execute()
 // also the soname
 val moduleId by extra("walletfix4oos14")
 val moduleName by extra("Wallet Fix for Oxygenos 14")
-val verName by extra("2.0.0")
+val verName by extra("2.0.1")
 val verCode by extra(1000+gitCommitCount)
 val commitHash by extra(gitCommitHash)
 val abiList by extra(listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64"))

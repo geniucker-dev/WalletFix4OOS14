@@ -1,5 +1,10 @@
 ## WalletFix4OOS14 更新日志
 
+### 2.0.1
+
+- fix: spoof MODEL to all Oneplus Wallet process and unionpay tsmservice
+- log: refine logging
+
 ### 2.0.0
 
 - Use zygisk to spoof MODEL only to Oneplus Wallet (instead of global spoofing)
