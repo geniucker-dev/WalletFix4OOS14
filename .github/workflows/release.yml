@@ -58,6 +58,13 @@ jobs:
           files: |
             Wallet-Fix-*.zip
 
+      - name: Cleanup
+        run: |
+          rm -rf Wallet-Fix-*
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: write update.json
         run: |
           version="${{ needs.setup.outputs.version }}"
