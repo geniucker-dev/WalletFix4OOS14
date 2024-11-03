@@ -63,3 +63,12 @@ jobs:
           version="${{ needs.setup.outputs.version }}"
           versionCode="${{ needs.setup.outputs.versionCode }}"
           zipUrl="https://github.com/geniucker-dev/WalletFix4OOS14/releases/download/${version}/${{ steps.zip.outputs.release }}"
+          echo '{
+            "version": "'${version}'",
+            "versionCode": '${versionCode}',
+            "zipUrl": "'${zipUrl}'",
+            "changelog": "https://raw.githubusercontent.com/geniucker-dev/WalletFix4OOS14/main/changelog.md"
+          }' > update.json
+          git add update.json
+          git commit -m "Update update.json"
+          git push
