@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - '*.*.*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -12,15 +13,17 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.set_tag.outputs.tag }}
+      version: ${{ steps.set_version.outputs.version }}
+      versionCode: ${{ steps.set_version.outputs.versionCode }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set tag
-        id: set_tag
+      - name: Set Version
+        id: set_version
         run: |
-          echo "tag=$(echo ${GITHUB_REF#refs/tags/})" >> $GITHUB_OUTPUT
+          echo "version=$(echo ${GITHUB_REF#refs/tags/})" >> $GITHUB_OUTPUT
+          echo "versionCode=$((1000 + $(git rev-list HEAD --count)))" >> $GITHUB_OUTPUT
 
   build:
     uses: ./.github/workflows/build.yml
@@ -34,6 +37,7 @@ jobs:
       - name: Display artifacts
         run: ls -R
       - name: zip
+        id: zip
         run: |
           for dir in Wallet-Fix-*; do
             if [ -d "$dir" ]; then
@@ -41,9 +45,16 @@ jobs:
               (cd $dir && zip -r9 "../$dir.zip" ./*)
             fi
           done
+          echo "release=$(ls Wallet-Fix-*-release.zip)" >> $GITHUB_OUTPUT
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             Wallet-Fix-*.zip
+
+      - name: write update.json
+        run: |
+          version="${{ needs.setup.outputs.version }}"
+          versionCode="${{ needs.setup.outputs.versionCode }}"
+          zipUrl="https://github.com/geniucker-dev/WalletFix4OOS14/releases/download/${version}/${{ steps.zip.outputs.release }}"
