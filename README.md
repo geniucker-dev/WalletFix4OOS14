@@ -1,6 +1,8 @@
-# Wallet Fix for OxygenOS 14
+# Wallet Fix for OxygenOS
 
-使OxygenOS 14的**一加12**可以使用Oppo钱包，若使用其他设备，请在安装完成后创建`/data/adb/walletfix/spoof_vars`文件，文件内容为`MODEL=你的设备型号`
+使OxygenOS的**一加12**可以使用Oppo钱包，若使用其他设备，请在安装完成后创建`/data/adb/walletfix/spoof_vars`文件，文件内容为`MODEL=你的设备型号`
+
+已在一加12的OxygenOS 14和OxygenOS15测试
 
 ## 说明
 

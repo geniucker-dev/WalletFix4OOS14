@@ -19,8 +19,8 @@ val gitCommitCount = "git rev-list HEAD --count".execute().toInt()
 val gitCommitHash = "git rev-parse --verify --short HEAD".execute()
 
 // also the soname
-val moduleId by extra("walletfix4oos14")
-val moduleName by extra("Wallet Fix for Oxygenos 14")
+val moduleId by extra("walletfix4oos")
+val moduleName by extra("Wallet Fix for Oxygenos")
 val verName by extra("2.0.1")
 val verCode by extra(1000+gitCommitCount)
 val commitHash by extra(gitCommitHash)
