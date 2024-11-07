@@ -1,6 +1,6 @@
 {
-  "version": "2.0.1",
-  "versionCode": 1017,
-  "zipUrl": "https://github.com/geniucker-dev/WalletFix4OOS/releases/download/2.0.1/Wallet-Fix-for-Oxygenos-14-2.0.1-1017-eb05b9f-release.zip",
-  "changelog": "https://raw.githubusercontent.com/geniucker-dev/WalletFix4OOS/main/changelog.md"
+  "version": "2.0.2",
+  "versionCode": 1030,
+  "zipUrl": "https://github.com/geniucker-dev/WalletFix4OOS14/releases/download/2.0.2/Wallet-Fix-for-OxygenOS-2.0.2-1030-90fd84c-release.zip",
+  "changelog": "https://raw.githubusercontent.com/geniucker-dev/WalletFix4OOS14/main/changelog.md"
 }
