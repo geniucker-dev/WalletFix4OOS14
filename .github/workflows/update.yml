@@ -47,11 +47,21 @@ jobs:
         with:
           path: output/my_stock.img
           key: ${{ steps.setup.outputs.FILENAME }}-my_stock
+      
+      - name: Restore cached my_heytap.img
+        id: restore_cache_my_heytap
+        uses: actions/cache/restore@v4
+        with:
+          path: output/my_heytap.img
+          key: ${{ steps.setup.outputs.FILENAME }}-my_heytap
 
-      - name: Download my_stock partition from the OTA update
+      - name: Download my_stock and my_heytap partition from the OTA update
         run: |
           if [ ! -f output/my_stock.img ]; then
             python -m payload_dumper --partitions my_stock "${{ github.event.inputs.url }}"
+          fi
+          if [ ! -f output/my_heytap.img ]; then
+            python -m payload_dumper --partitions my_heytap "${{ github.event.inputs.url }}"
           fi
 
       - name: Save cache my_stock.img
@@ -62,6 +72,14 @@ jobs:
           path: output/my_stock.img
           key: ${{ steps.restore_cache_my_stock.outputs.cache-primary-key }}
 
+      - name: Save cache my_heytap.img
+        if: ${{ steps.restore_cache_my_heytap.outputs.cache-hit != 'true' }}
+        id: save_cache_my_heytap
+        uses: actions/cache/save@v4
+        with:
+          path: output/my_heytap.img
+          key: ${{ steps.restore_cache_my_heytap.outputs.cache-primary-key }}
+
       - name: Update files
         run: |
           git checkout --orphan apk
@@ -69,11 +87,17 @@ jobs:
 
           # mount images
           mkdir -p mnt/my_stock
+          mkdir -p mnt/my_heytap
           /tmp/erofs-utils/fuse.erofs output/my_stock.img mnt/my_stock
+          /tmp/erofs-utils/fuse.erofs output/my_heytap.img mnt/my_heytap
 
           # list folders in my_stock/priv-app
           echo "List of folders in my_stock/priv-app"
           ls -l mnt/my_stock/priv-app
+          echo
+          # list folders in heytap/priv-app
+          echo "List of folders in my_heytap/priv-app"
+          ls -l mnt/my_heytap/priv-app
           echo
 
           # update files
@@ -86,10 +110,11 @@ jobs:
           mkdir -p product/priv-app
           cp -r mnt/my_stock/priv-app/KeKeUserCenter product/priv-app/
           cp -r mnt/my_stock/priv-app/KeKeUserCenterAccount product/priv-app/
-          cp -r mnt/my_stock/priv-app/OpenID product/priv-app/
+          cp -r mnt/my_heytap/priv-app/OpenID product/priv-app/
           
           # unmount images
           umount mnt/my_stock
+          umount mnt/my_heytap
     
       - name: Cleanup
         run: |
