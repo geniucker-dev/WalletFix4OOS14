@@ -110,7 +110,14 @@ jobs:
           mkdir -p product/priv-app
           cp -r mnt/my_stock/priv-app/KeKeUserCenter product/priv-app/
           cp -r mnt/my_stock/priv-app/KeKeUserCenterAccount product/priv-app/
-          cp -r mnt/my_heytap/priv-app/OpenID product/priv-app/
+          if [ -d mnt/my_heytap/priv-app/OpenID ]; then
+            cp -r mnt/my_heytap/priv-app/OpenID product/priv-app/
+          elif [ -d mnt/my_stock/priv-app/OpenID ]; then
+            cp -r mnt/my_stock/priv-app/OpenID product/priv-app/
+          else
+            echo "OpenID not found"
+            exit 1
+          fi
           
           # unmount images
           umount mnt/my_stock
